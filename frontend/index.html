@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Action LLM Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🎯 Text-to-Action LLM</h1>
+            <p>Convert natural language instructions to structured actions</p>
+        </header>
+
+        <!-- Input Section -->
+        <section class="input-section">
+            <div class="input-group">
+                <label for="instruction">Enter your instruction:</label>
+                <input 
+                    type="text" 
+                    id="instruction" 
+                    placeholder="e.g., Move the red box to the blue platform"
+                    autocomplete="off"
+                >
+                <button id="submit-btn" onclick="submitInstruction()">
+                    <span id="btn-text">Generate Action</span>
+                    <span id="btn-loader" class="loader hidden"></span>
+                </button>
+            </div>
+            
+            <!-- Quick Examples -->
+            <div class="examples">
+                <span>Try:</span>
+                <button class="example-btn" onclick="setExample('Move the red box to the blue platform')">
+                    Move red box
+                </button>
+                <button class="example-btn" onclick="setExample('Rotate the green sphere 90 degrees')">
+                    Rotate sphere
+                </button>
+                <button class="example-btn" onclick="setExample('Scale the yellow cube by 2x')">
+                    Scale cube
+                </button>
+            </div>
+        </section>
+
+        <!-- Scene Section -->
+        <section class="scene-section">
+            <div class="scene-container">
+                <canvas id="scene-canvas"></canvas>
+                <div id="scene-overlay" class="scene-overlay hidden">
+                    <div class="action-indicator" id="action-indicator"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Output Section -->
+        <section class="output-section">
+            <div class="output-header">
+                <h3>📋 Action Plan</h3>
+                <button id="copy-btn" class="copy-btn" onclick="copyOutput()" title="Copy JSON">
+                    📋
+                </button>
+            </div>
+            <pre id="output-json" class="output-json">
+{
+  "object": "...",
+  "initial_position": "...",
+  "action": "...",
+  "target_position": "..."
+}
+            </pre>
+        </section>
+
+        <!-- Status Bar -->
+        <footer class="status-bar">
+            <div class="status-item">
+                <span class="status-dot" id="api-status"></span>
+                <span id="api-status-text">Checking API...</span>
+            </div>
+            <div class="status-item">
+                <span>Latency: </span>
+                <span id="latency">--</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="scene.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

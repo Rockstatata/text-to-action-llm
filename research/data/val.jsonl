@@ -1,0 +1,3 @@
+{"instruction": "Relocate the purple sphere to the desk", "output": "{\"object\": \"purple sphere\", \"initial_position\": \"floor\", \"action\": \"move\", \"target_position\": \"desk\"}"}
+{"instruction": "Rotate the orange box 45 degrees clockwise", "output": "{\"object\": \"orange box\", \"initial_position\": \"center\", \"action\": \"rotate\", \"target_position\": \"45 degrees clockwise\"}"}
+{"instruction": "Resize the white cube to 2x its size", "output": "{\"object\": \"white cube\", \"initial_position\": \"origin\", \"action\": \"scale\", \"target_position\": \"2x original size\"}"}
