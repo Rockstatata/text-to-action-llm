@@ -1,185 +1,60 @@
-"""
-LLM Model loading and inference.
-Supports multiple backends: HuggingFace, Ollama, or API.
-"""
-
-from typing import Optional
 import os
+from unsloth import FastLanguageModel
+from transformers import AutoTokenizer
+import torch
+import logging
 
-from app.config import settings
-from app.llm.prompt import format_prompt
-from app.utils.logger import logger
+logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(name)s | %(message)s')
+logger = logging.getLogger('text-to-action')
 
-# Global model state
+# Global variables to store the loaded model and tokenizer
 _model = None
 _tokenizer = None
-_model_loaded = False
-
 
 def load_model():
-    """Load the LLM model based on configuration."""
-    global _model, _tokenizer, _model_loaded
-    
-    if _model_loaded:
-        logger.info("Model already loaded")
-        return
-    
-    backend = settings.LLM_BACKEND
-    logger.info(f"Loading model with backend: {backend}")
-    
-    if backend == "transformers":
-        _load_transformers_model()
-    elif backend == "ollama":
-        _init_ollama_client()
-    elif backend == "mock":
-        logger.info("Using mock model for development")
-        _model_loaded = True
-    else:
-        raise ValueError(f"Unknown backend: {backend}")
-
-
-def _load_transformers_model():
-    """Load model using HuggingFace Transformers."""
-    global _model, _tokenizer, _model_loaded
-    
-    try:
-        from transformers import AutoModelForCausalLM, AutoTokenizer
-        import torch
-        
-        model_path = settings.MODEL_PATH
-        logger.info(f"Loading model from: {model_path}")
-        
-        _tokenizer = AutoTokenizer.from_pretrained(model_path)
-        _model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            torch_dtype=torch.float16,
-            device_map="auto",
-            load_in_4bit=True,
-        )
-        
-        _model_loaded = True
-        logger.info("Transformers model loaded successfully")
-        
-    except Exception as e:
-        logger.error(f"Failed to load transformers model: {e}")
-        raise
-
-
-def _init_ollama_client():
-    """Initialize Ollama client for local inference."""
-    global _model_loaded
-    
-    try:
-        import requests
-        
-        # Check if Ollama is running
-        response = requests.get(f"{settings.OLLAMA_URL}/api/tags")
-        if response.status_code == 200:
-            _model_loaded = True
-            logger.info("Ollama client initialized")
-        else:
-            raise ConnectionError("Ollama server not responding")
-            
-    except Exception as e:
-        logger.error(f"Failed to connect to Ollama: {e}")
-        raise
-
-
-def is_model_loaded() -> bool:
-    """Check if model is loaded and ready."""
-    return _model_loaded
-
-
-def generate_action(instruction: str) -> str:
-    """
-    Generate action plan from instruction.
-    
-    Args:
-        instruction: Natural language instruction
-        
-    Returns:
-        JSON string with action plan
-    """
-    if not _model_loaded:
-        raise RuntimeError("Model not loaded")
-    
-    backend = settings.LLM_BACKEND
-    prompt = format_prompt(instruction)
-    
-    if backend == "transformers":
-        return _generate_transformers(prompt)
-    elif backend == "ollama":
-        return _generate_ollama(prompt)
-    elif backend == "mock":
-        return _generate_mock(instruction)
-    else:
-        raise ValueError(f"Unknown backend: {backend}")
-
-
-def _generate_transformers(prompt: str) -> str:
-    """Generate using HuggingFace Transformers."""
     global _model, _tokenizer
-    
-    inputs = _tokenizer(prompt, return_tensors="pt").to(_model.device)
-    
-    outputs = _model.generate(
-        **inputs,
-        max_new_tokens=settings.MAX_NEW_TOKENS,
-        temperature=settings.TEMPERATURE,
-        do_sample=settings.TEMPERATURE > 0,
-        pad_token_id=_tokenizer.eos_token_id,
-    )
-    
-    response = _tokenizer.decode(outputs[0], skip_special_tokens=True)
-    
-    # Extract JSON from response
-    json_start = response.find("{")
-    json_end = response.rfind("}") + 1
-    
-    if json_start != -1 and json_end > json_start:
-        return response[json_start:json_end]
-    
-    return response
+    if _model is not None and _tokenizer is not None:
+        logger.info("Model already loaded")
+        return _model, _tokenizer
 
+    backend = os.environ.get("LLM_BACKEND", "transformers")
+    lora_path = os.environ.get("MODEL_PATH", "/content/text-to-action-lora") # Path to saved LoRA adapters
+    base_model_name = "unsloth/Meta-Llama-3.1-8B-Instruct" # The original base model
 
-def _generate_ollama(prompt: str) -> str:
-    """Generate using Ollama local server."""
-    import requests
-    
-    response = requests.post(
-        f"{settings.OLLAMA_URL}/api/generate",
-        json={
-            "model": settings.OLLAMA_MODEL,
-            "prompt": prompt,
-            "stream": False,
-            "options": {
-                "temperature": settings.TEMPERATURE,
-                "num_predict": settings.MAX_NEW_TOKENS,
-            }
-        }
-    )
-    
-    result = response.json()
-    return result.get("response", "")
+    logger.info(f"Loading model with backend: {backend}")
+    logger.info(f"Loading LoRA adapters from: {lora_path}")
 
+    if backend == "transformers":
+        # 1. Load the base model first
+        _model, _tokenizer = FastLanguageModel.from_pretrained(
+            model_name=base_model_name,
+            max_seq_length=2048,
+            dtype=None,  # Auto-detect from base model
+            load_in_4bit=True, # Should match training setup
+        )
 
-def _generate_mock(instruction: str) -> str:
-    """Generate mock response for development."""
-    import json
-    
-    # Simple mock response
-    mock_response = {
-        "object": "object from instruction",
-        "initial_position": "floor",
-        "action": "move",
-        "target_position": "target position"
-    }
-    
-    # Try to extract object from instruction
-    words = instruction.lower().split()
-    for i, word in enumerate(words):
-        if word in ["the", "a", "an"] and i + 2 < len(words):
-            mock_response["object"] = f"{words[i+1]} {words[i+2]}"
-            break
-    
-    return json.dumps(mock_response)
+        # 2. Apply Unsloth's inference optimizations to the base model
+        FastLanguageModel.for_inference(_model)
+
+        # 3. Load the LoRA adapters onto the base model
+        _model = FastLanguageModel.get_peft_model(
+            _model,
+            r=16,  # Must match training r
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
+                            "gate_proj", "up_proj", "down_proj"], # Must match training
+            lora_alpha=32, # Must match training
+            lora_dropout=0.05, # Match training dropout, or 0 for inference
+            bias="none", # Must match training
+        )
+        _model.load_adapter(lora_path, adapter_name="text_to_action_adapter") # Added adapter_name
+
+        logger.info("Transformers model with LoRA adapters loaded successfully")
+        return _model, _tokenizer
+    else:
+        raise ValueError(f"Unknown LLM_BACKEND: {backend}")
+
+def get_model():
+    return _model
+
+def get_tokenizer():
+    return _tokenizer

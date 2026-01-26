@@ -27,7 +27,7 @@ body {
 }
 
 .container {
-    max-width: 900px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 2rem;
 }
@@ -50,6 +50,57 @@ body {
 .header p {
     color: var(--text-muted);
     font-size: 1.1rem;
+}
+
+/* Model Info Section */
+.model-info {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    justify-content: center;
+}
+
+.info-badge {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: var(--text-color);
+}
+
+.info-badge strong {
+    color: var(--primary-color);
+    margin-right: 0.5rem;
+}
+
+/* Action Types Section */
+.action-types {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.action-type {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.action-type h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.action-type p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.4;
 }
 
 /* Input Section */
@@ -132,13 +183,14 @@ body {
 .examples span {
     color: var(--text-muted);
     font-size: 0.875rem;
+    font-weight: 600;
 }
 
 .example-btn {
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
     background: var(--bg-color);
-    color: var(--text-muted);
+    color: var(--text-color);
     border: 1px solid var(--border-color);
     border-radius: 20px;
     cursor: pointer;
@@ -148,6 +200,7 @@ body {
 .example-btn:hover {
     border-color: var(--primary-color);
     color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.1);
 }
 
 /* Scene Section */
@@ -210,7 +263,14 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.output-description {
+    font-size: 0.875rem;
+    color: var(--text-muted);
     margin-bottom: 1rem;
+    font-style: italic;
 }
 
 .output-header h3 {

@@ -1,36 +1,10 @@
-"""
-Health check endpoint.
-"""
-
 from fastapi import APIRouter
-
-from app.llm.model import is_model_loaded
+from app.llm.model import get_model # Corrected import
 
 router = APIRouter()
 
-
 @router.get("/health")
 async def health_check():
-    """
-    Health check endpoint for monitoring.
-    
-    Returns:
-        Health status and model loading state
-    """
-    return {
-        "status": "healthy",
-        "model_loaded": is_model_loaded(),
-    }
-
-
-@router.get("/ready")
-async def readiness_check():
-    """
-    Readiness probe for Kubernetes/container orchestration.
-    
-    Returns 200 if model is loaded and ready to serve.
-    """
-    if is_model_loaded():
-        return {"status": "ready"}
-    else:
-        return {"status": "not_ready"}, 503
+    # Check if the model has been loaded (get_model will return None if not)
+    model_status = "ok" if get_model() is not None else "loading"
+    return {"status": model_status, "model_loaded": get_model() is not None}

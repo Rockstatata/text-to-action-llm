@@ -10,18 +10,47 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>🎯 Text-to-Action LLM</h1>
-            <p>Convert natural language instructions to structured actions</p>
+            <h1>Text-to-Action LLM</h1>
+            <p>Model-Driven Spatial Reasoning - LLaMA infers actions, not hardcoded rules</p>
         </header>
+
+        <!-- Model Capabilities Info -->
+        <section class="model-info">
+            <div class="info-badge">
+                <strong>Model-Driven:</strong> System creates objects dynamically from LLM output
+            </div>
+            <div class="info-badge">
+                <strong>No Hardcoding:</strong> Model infers object, position, and action
+            </div>
+            <div class="info-badge">
+                <strong>Visual Proof:</strong> Before → After transformation driven by model
+            </div>
+        </section>
+
+        <!-- Action Types Info -->
+        <section class="action-types">
+            <div class="action-type">
+                <h3>Move</h3>
+                <p>Place, Put, Transfer, Relocate, Move</p>
+            </div>
+            <div class="action-type">
+                <h3>Rotate</h3>
+                <p>Turn, Spin, Rotate (degrees + direction)</p>
+            </div>
+            <div class="action-type">
+                <h3>Scale</h3>
+                <p>Make bigger/smaller, Shrink, Resize</p>
+            </div>
+        </section>
 
         <!-- Input Section -->
         <section class="input-section">
             <div class="input-group">
-                <label for="instruction">Enter your instruction:</label>
+                <label for="instruction">Enter any spatial instruction:</label>
                 <input 
                     type="text" 
                     id="instruction" 
-                    placeholder="e.g., Move the red box to the blue platform"
+                    placeholder="Try any object/color: Move cyan box to red platform"
                     autocomplete="off"
                 >
                 <button id="submit-btn" onclick="submitInstruction()">
@@ -32,15 +61,21 @@
             
             <!-- Quick Examples -->
             <div class="examples">
-                <span>Try:</span>
-                <button class="example-btn" onclick="setExample('Move the red box to the blue platform')">
-                    Move red box
+                <span>Try any object:</span>
+                <button class="example-btn" onclick="setExample('Place orange pyramid on top shelf')">
+                    Move Object
                 </button>
-                <button class="example-btn" onclick="setExample('Rotate the green sphere 90 degrees')">
-                    Rotate sphere
+                <button class="example-btn" onclick="setExample('Move pink cylinder to green platform')">
+                    New Object
                 </button>
-                <button class="example-btn" onclick="setExample('Scale the yellow cube by 2x')">
-                    Scale cube
+                <button class="example-btn" onclick="setExample('Turn yellow pyramid 90 degrees counterclockwise')">
+                    Rotate
+                </button>
+                <button class="example-btn" onclick="setExample('Shrink brown cone to 0.25 its size')">
+                    Scale Dynamic
+                </button>
+                <button class="example-btn" onclick="setExample('Transfer cyan sphere to pedestal')">
+                    Custom Color
                 </button>
             </div>
         </section>
@@ -58,10 +93,13 @@
         <!-- Output Section -->
         <section class="output-section">
             <div class="output-header">
-                <h3>📋 Action Plan</h3>
+                <h3>Model-Inferred Action Plan</h3>
                 <button id="copy-btn" class="copy-btn" onclick="copyOutput()" title="Copy JSON">
-                    📋
+                    Copy
                 </button>
+            </div>
+            <div class="output-description">
+                Model extracts: Object | Initial Position | Action Type | Target Position
             </div>
             <pre id="output-json" class="output-json">
 {

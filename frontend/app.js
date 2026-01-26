@@ -43,15 +43,50 @@ function setupEventListeners() {
 }
 
 /**
+ * Normalize instruction by replacing underscores with spaces and trimming
+ * This ensures consistent input format for the LLM regardless of user input style
+ */
+function normalizeInstruction(instruction) {
+    // Replace underscores with spaces
+    let normalized = instruction.replace(/_/g, ' ');
+    
+    // Replace hyphens with spaces (e.g., "red-box" -> "red box")
+    normalized = normalized.replace(/-/g, ' ');
+    
+    // Normalize multiple spaces to single space
+    normalized = normalized.replace(/\s+/g, ' ');
+    
+    // Trim leading/trailing whitespace
+    normalized = normalized.trim();
+    
+    // Log if normalization changed the input
+    if (normalized !== instruction.trim()) {
+        console.log('Normalized instruction:', instruction, '->', normalized);
+        console.log('  - Replaced underscores/hyphens with spaces');
+        console.log('  - Normalized multiple spaces');
+    }
+    
+    return normalized;
+}
+
+/**
  * Submit instruction to API
  */
 async function submitInstruction() {
     const input = document.getElementById('instruction');
-    const instruction = input.value.trim();
+    const rawInstruction = input.value.trim();
     
-    if (!instruction) {
+    if (!rawInstruction) {
         showError('Please enter an instruction');
         return;
+    }
+    
+    // Normalize the instruction
+    const instruction = normalizeInstruction(rawInstruction);
+    
+    // Update input field to show normalized version for user feedback
+    if (instruction !== rawInstruction) {
+        input.value = instruction;
     }
     
     if (isLoading) return;
@@ -130,8 +165,8 @@ async function copyOutput() {
         await navigator.clipboard.writeText(JSON.stringify(lastActionPlan, null, 2));
         
         const btn = document.getElementById('copy-btn');
-        btn.textContent = '✓';
-        setTimeout(() => btn.textContent = '📋', 1500);
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 1500);
     } catch (err) {
         console.error('Copy failed:', err);
     }
