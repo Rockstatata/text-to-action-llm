@@ -1,0 +1,100 @@
+{"instruction": "Shrink black pyramid to 0.25 its size", "output": "{\"object\": \"black pyramid\", \"initial_position\": \"center\", \"action\": \"scale\", \"target_position\": \"0.25x original size\"}"}
+{"instruction": "Put black ball at left corner", "output": "{\"object\": \"black ball\", \"initial_position\": \"origin\", \"action\": \"move\", \"target_position\": \"left corner\"}"}
+{"instruction": "Shrink purple cone to 0.5 its size", "output": "{\"object\": \"purple cone\", \"initial_position\": \"desk\", \"action\": \"scale\", \"target_position\": \"0.5x original size\"}"}
+{"instruction": "Spin black box by 45 degrees", "output": "{\"object\": \"black box\", \"initial_position\": \"bottom shelf\", \"action\": \"rotate\", \"target_position\": \"45 degrees counterclockwise\"}"}
+{"instruction": "Rotate yellow cylinder 270 degrees", "output": "{\"object\": \"yellow cylinder\", \"initial_position\": \"origin\", \"action\": \"rotate\", \"target_position\": \"270 degrees counterclockwise\"}"}
+{"instruction": "Turn green ball 45 degrees clockwise", "output": "{\"object\": \"green ball\", \"initial_position\": \"right corner\", \"action\": \"rotate\", \"target_position\": \"45 degrees clockwise\"}"}
+{"instruction": "Place green box on table", "output": "{\"object\": \"green box\", \"initial_position\": \"origin\", \"action\": \"move\", \"target_position\": \"table\"}"}
+{"instruction": "Put red cylinder at floor", "output": "{\"object\": \"red cylinder\", \"initial_position\": \"ground\", \"action\": \"move\", \"target_position\": \"floor\"}"}
+{"instruction": "Relocate blue sphere to table", "output": "{\"object\": \"blue sphere\", \"initial_position\": \"left corner\", \"action\": \"move\", \"target_position\": \"table\"}"}
+{"instruction": "Rotate black cube 45 degrees", "output": "{\"object\": \"black cube\", \"initial_position\": \"origin\", \"action\": \"rotate\", \"target_position\": \"45 degrees clockwise\"}"}
+{"instruction": "Spin purple sphere by 270 degrees", "output": "{\"object\": \"purple sphere\", \"initial_position\": \"center\", \"action\": \"rotate\", \"target_position\": \"270 degrees counterclockwise\"}"}
+{"instruction": "Spin purple cone by 270 degrees", "output": "{\"object\": \"purple cone\", \"initial_position\": \"left corner\", \"action\": \"rotate\", \"target_position\": \"270 degrees counterclockwise\"}"}
+{"instruction": "Spin yellow ball by 360 degrees", "output": "{\"object\": \"yellow ball\", \"initial_position\": \"origin\", \"action\": \"rotate\", \"target_position\": \"360 degrees clockwise\"}"}
+{"instruction": "Spin yellow cone by 270 degrees", "output": "{\"object\": \"yellow cone\", \"initial_position\": \"left corner\", \"action\": \"rotate\", \"target_position\": \"270 degrees counterclockwise\"}"}
+{"instruction": "Shrink yellow sphere to 0.5 its size", "output": "{\"object\": \"yellow sphere\", \"initial_position\": \"left corner\", \"action\": \"scale\", \"target_position\": \"0.5x original size\"}"}
+{"instruction": "Shrink white box to 0.5 its size", "output": "{\"object\": \"white box\", \"initial_position\": \"pedestal\", \"action\": \"scale\", \"target_position\": \"0.5x original size\"}"}
+{"instruction": "Transfer white cone to pedestal", "output": "{\"object\": \"white cone\", \"initial_position\": \"blue platform\", \"action\": \"move\", \"target_position\": \"pedestal\"}"}
+{"instruction": "Move purple sphere to top shelf", "output": "{\"object\": \"purple sphere\", \"initial_position\": \"red platform\", \"action\": \"move\", \"target_position\": \"top shelf\"}"}
+{"instruction": "Shrink white pyramid to 0.25 its size", "output": "{\"object\": \"white pyramid\", \"initial_position\": \"center\", \"action\": \"scale\", \"target_position\": \"0.25x original size\"}"}
+{"instruction": "Shrink purple cylinder to 0.5 its size", "output": "{\"object\": \"purple cylinder\", \"initial_position\": \"bottom shelf\", \"action\": \"scale\", \"target_position\": \"0.5x original size\"}"}
+{"instruction": "Move blue pyramid to left corner", "output": "{\"object\": \"blue pyramid\", \"initial_position\": \"pedestal\", \"action\": \"move\", \"target_position\": \"left corner\"}"}
+{"instruction": "Turn orange box 45 degrees counterclockwise", "output": "{\"object\": \"orange box\", \"initial_position\": \"center\", \"action\": \"rotate\", \"target_position\": \"45 degrees counterclockwise\"}"}
+{"instruction": "Make yellow cone 2 times bigger", "output": "{\"object\": \"yellow cone\", \"initial_position\": \"blue platform\", \"action\": \"scale\", \"target_position\": \"2x original size\"}"}
+{"instruction": "Move red pyramid to table", "output": "{\"object\": \"red pyramid\", \"initial_position\": \"right corner\", \"action\": \"move\", \"target_position\": \"table\"}"}
+{"instruction": "Rotate black ball 90 degrees", "output": "{\"object\": \"black ball\", \"initial_position\": \"pedestal\", \"action\": \"rotate\", \"target_position\": \"90 degrees clockwise\"}"}
+{"instruction": "Shrink yellow sphere to 0.25 its size", "output": "{\"object\": \"yellow sphere\", \"initial_position\": \"blue platform\", \"action\": \"scale\", \"target_position\": \"0.25x original size\"}"}
+{"instruction": "Relocate white sphere to left corner", "output": "{\"object\": \"white sphere\", \"initial_position\": \"green platform\", \"action\": \"move\", \"target_position\": \"left corner\"}"}
+{"instruction": "Shrink black cylinder to 0.5 its size", "output": "{\"object\": \"black cylinder\", \"initial_position\": \"top shelf\", \"action\": \"scale\", \"target_position\": \"0.5x original size\"}"}
+{"instruction": "Move green pyramid to bottom shelf", "output": "{\"object\": \"green pyramid\", \"initial_position\": \"desk\", \"action\": \"move\", \"target_position\": \"bottom shelf\"}"}
+{"instruction": "Put white cone at center", "output": "{\"object\": \"white cone\", \"initial_position\": \"green platform\", \"action\": \"move\", \"target_position\": \"center\"}"}
+{"instruction": "Shrink blue sphere to 0.5 its size", "output": "{\"object\": \"blue sphere\", \"initial_position\": \"origin\", \"action\": \"scale\", \"target_position\": \"0.5x original size\"}"}
+{"instruction": "Make yellow cylinder 3 times bigger", "output": "{\"object\": \"yellow cylinder\", \"initial_position\": \"center\", \"action\": \"scale\", \"target_position\": \"3x original size\"}"}
+{"instruction": "Scale blue ball by 2x", "output": "{\"object\": \"blue ball\", \"initial_position\": \"right corner\", \"action\": \"scale\", \"target_position\": \"2x original size\"}"}
+{"instruction": "Transfer green sphere to floor", "output": "{\"object\": \"green sphere\", \"initial_position\": \"top shelf\", \"action\": \"move\", \"target_position\": \"floor\"}"}
+{"instruction": "Shrink white cylinder to 0.5 its size", "output": "{\"object\": \"white cylinder\", \"initial_position\": \"floor\", \"action\": \"scale\", \"target_position\": \"0.5x original size\"}"}
+{"instruction": "Transfer blue cube to pedestal", "output": "{\"object\": \"blue cube\", \"initial_position\": \"bottom shelf\", \"action\": \"move\", \"target_position\": \"pedestal\"}"}
+{"instruction": "Transfer white ball to floor", "output": "{\"object\": \"white ball\", \"initial_position\": \"top shelf\", \"action\": \"move\", \"target_position\": \"floor\"}"}
+{"instruction": "Make green pyramid 3 times bigger", "output": "{\"object\": \"green pyramid\", \"initial_position\": \"red platform\", \"action\": \"scale\", \"target_position\": \"3x original size\"}"}
+{"instruction": "Put blue ball at right corner", "output": "{\"object\": \"blue ball\", \"initial_position\": \"green platform\", \"action\": \"move\", \"target_position\": \"right corner\"}"}
+{"instruction": "Make red cylinder 2 times bigger", "output": "{\"object\": \"red cylinder\", \"initial_position\": \"left corner\", \"action\": \"scale\", \"target_position\": \"2x original size\"}"}
+{"instruction": "Make black cube 2 times bigger", "output": "{\"object\": \"black cube\", \"initial_position\": \"top shelf\", \"action\": \"scale\", \"target_position\": \"2x original size\"}"}
+{"instruction": "Shrink purple cone to 0.5 its size", "output": "{\"object\": \"purple cone\", \"initial_position\": \"center\", \"action\": \"scale\", \"target_position\": \"0.5x original size\"}"}
+{"instruction": "Turn green cube 45 degrees counterclockwise", "output": "{\"object\": \"green cube\", \"initial_position\": \"pedestal\", \"action\": \"rotate\", \"target_position\": \"45 degrees counterclockwise\"}"}
+{"instruction": "Scale yellow box by 3x", "output": "{\"object\": \"yellow box\", \"initial_position\": \"green platform\", \"action\": \"scale\", \"target_position\": \"3x original size\"}"}
+{"instruction": "Shrink black sphere to 0.5 its size", "output": "{\"object\": \"black sphere\", \"initial_position\": \"ground\", \"action\": \"scale\", \"target_position\": \"0.5x original size\"}"}
+{"instruction": "Turn white cylinder 360 degrees clockwise", "output": "{\"object\": \"white cylinder\", \"initial_position\": \"green platform\", \"action\": \"rotate\", \"target_position\": \"360 degrees clockwise\"}"}
+{"instruction": "Scale blue pyramid by 3x", "output": "{\"object\": \"blue pyramid\", \"initial_position\": \"pedestal\", \"action\": \"scale\", \"target_position\": \"3x original size\"}"}
+{"instruction": "Resize orange sphere to 3x its size", "output": "{\"object\": \"orange sphere\", \"initial_position\": \"origin\", \"action\": \"scale\", \"target_position\": \"3x original size\"}"}
+{"instruction": "Resize green sphere to 3x its size", "output": "{\"object\": \"green sphere\", \"initial_position\": \"top shelf\", \"action\": \"scale\", \"target_position\": \"3x original size\"}"}
+{"instruction": "Move red sphere to left corner", "output": "{\"object\": \"red sphere\", \"initial_position\": \"floor\", \"action\": \"move\", \"target_position\": \"left corner\"}"}
+{"instruction": "Make black cone 3 times bigger", "output": "{\"object\": \"black cone\", \"initial_position\": \"bottom shelf\", \"action\": \"scale\", \"target_position\": \"3x original size\"}"}
+{"instruction": "Make green box 2 times bigger", "output": "{\"object\": \"green box\", \"initial_position\": \"pedestal\", \"action\": \"scale\", \"target_position\": \"2x original size\"}"}
+{"instruction": "Put orange sphere at table", "output": "{\"object\": \"orange sphere\", \"initial_position\": \"origin\", \"action\": \"move\", \"target_position\": \"table\"}"}
+{"instruction": "Turn yellow cone 90 degrees clockwise", "output": "{\"object\": \"yellow cone\", \"initial_position\": \"red platform\", \"action\": \"rotate\", \"target_position\": \"90 degrees clockwise\"}"}
+{"instruction": "Make orange sphere 2 times bigger", "output": "{\"object\": \"orange sphere\", \"initial_position\": \"ground\", \"action\": \"scale\", \"target_position\": \"2x original size\"}"}
+{"instruction": "Rotate purple ball 180 degrees", "output": "{\"object\": \"purple ball\", \"initial_position\": \"ground\", \"action\": \"rotate\", \"target_position\": \"180 degrees clockwise\"}"}
+{"instruction": "Resize purple pyramid to 2x its size", "output": "{\"object\": \"purple pyramid\", \"initial_position\": \"ground\", \"action\": \"scale\", \"target_position\": \"2x original size\"}"}
+{"instruction": "Spin blue cube by 45 degrees", "output": "{\"object\": \"blue cube\", \"initial_position\": \"red platform\", \"action\": \"rotate\", \"target_position\": \"45 degrees counterclockwise\"}"}
+{"instruction": "Spin yellow box by 360 degrees", "output": "{\"object\": \"yellow box\", \"initial_position\": \"table\", \"action\": \"rotate\", \"target_position\": \"360 degrees clockwise\"}"}
+{"instruction": "Shrink red ball to 0.5 its size", "output": "{\"object\": \"red ball\", \"initial_position\": \"left corner\", \"action\": \"scale\", \"target_position\": \"0.5x original size\"}"}
+{"instruction": "Put white box at blue platform", "output": "{\"object\": \"white box\", \"initial_position\": \"left corner\", \"action\": \"move\", \"target_position\": \"blue platform\"}"}
+{"instruction": "Resize yellow sphere to 2x its size", "output": "{\"object\": \"yellow sphere\", \"initial_position\": \"bottom shelf\", \"action\": \"scale\", \"target_position\": \"2x original size\"}"}
+{"instruction": "Move red sphere to origin", "output": "{\"object\": \"red sphere\", \"initial_position\": \"top shelf\", \"action\": \"move\", \"target_position\": \"origin\"}"}
+{"instruction": "Spin black ball by 270 degrees", "output": "{\"object\": \"black ball\", \"initial_position\": \"table\", \"action\": \"rotate\", \"target_position\": \"270 degrees counterclockwise\"}"}
+{"instruction": "Transfer purple box to red platform", "output": "{\"object\": \"purple box\", \"initial_position\": \"green platform\", \"action\": \"move\", \"target_position\": \"red platform\"}"}
+{"instruction": "Shrink purple box to 0.25 its size", "output": "{\"object\": \"purple box\", \"initial_position\": \"pedestal\", \"action\": \"scale\", \"target_position\": \"0.25x original size\"}"}
+{"instruction": "Turn red sphere 45 degrees counterclockwise", "output": "{\"object\": \"red sphere\", \"initial_position\": \"left corner\", \"action\": \"rotate\", \"target_position\": \"45 degrees counterclockwise\"}"}
+{"instruction": "Rotate black cone 90 degrees", "output": "{\"object\": \"black cone\", \"initial_position\": \"green platform\", \"action\": \"rotate\", \"target_position\": \"90 degrees counterclockwise\"}"}
+{"instruction": "Move orange sphere to table", "output": "{\"object\": \"orange sphere\", \"initial_position\": \"center\", \"action\": \"move\", \"target_position\": \"table\"}"}
+{"instruction": "Transfer red box to green platform", "output": "{\"object\": \"red box\", \"initial_position\": \"desk\", \"action\": \"move\", \"target_position\": \"green platform\"}"}
+{"instruction": "Rotate black sphere 270 degrees", "output": "{\"object\": \"black sphere\", \"initial_position\": \"red platform\", \"action\": \"rotate\", \"target_position\": \"270 degrees clockwise\"}"}
+{"instruction": "Shrink purple pyramid to 0.25 its size", "output": "{\"object\": \"purple pyramid\", \"initial_position\": \"bottom shelf\", \"action\": \"scale\", \"target_position\": \"0.25x original size\"}"}
+{"instruction": "Spin purple cone by 360 degrees", "output": "{\"object\": \"purple cone\", \"initial_position\": \"ground\", \"action\": \"rotate\", \"target_position\": \"360 degrees clockwise\"}"}
+{"instruction": "Relocate green sphere to red platform", "output": "{\"object\": \"green sphere\", \"initial_position\": \"blue platform\", \"action\": \"move\", \"target_position\": \"red platform\"}"}
+{"instruction": "Make yellow ball 2 times bigger", "output": "{\"object\": \"yellow ball\", \"initial_position\": \"blue platform\", \"action\": \"scale\", \"target_position\": \"2x original size\"}"}
+{"instruction": "Spin purple pyramid by 90 degrees", "output": "{\"object\": \"purple pyramid\", \"initial_position\": \"pedestal\", \"action\": \"rotate\", \"target_position\": \"90 degrees counterclockwise\"}"}
+{"instruction": "Transfer green cube to left corner", "output": "{\"object\": \"green cube\", \"initial_position\": \"bottom shelf\", \"action\": \"move\", \"target_position\": \"left corner\"}"}
+{"instruction": "Shrink purple cone to 0.25 its size", "output": "{\"object\": \"purple cone\", \"initial_position\": \"desk\", \"action\": \"scale\", \"target_position\": \"0.25x original size\"}"}
+{"instruction": "Relocate orange cone to desk", "output": "{\"object\": \"orange cone\", \"initial_position\": \"left corner\", \"action\": \"move\", \"target_position\": \"desk\"}"}
+{"instruction": "Transfer yellow cone to right corner", "output": "{\"object\": \"yellow cone\", \"initial_position\": \"green platform\", \"action\": \"move\", \"target_position\": \"right corner\"}"}
+{"instruction": "Spin black ball by 360 degrees", "output": "{\"object\": \"black ball\", \"initial_position\": \"right corner\", \"action\": \"rotate\", \"target_position\": \"360 degrees counterclockwise\"}"}
+{"instruction": "Resize white pyramid to 2x its size", "output": "{\"object\": \"white pyramid\", \"initial_position\": \"floor\", \"action\": \"scale\", \"target_position\": \"2x original size\"}"}
+{"instruction": "Shrink black cube to 0.25 its size", "output": "{\"object\": \"black cube\", \"initial_position\": \"center\", \"action\": \"scale\", \"target_position\": \"0.25x original size\"}"}
+{"instruction": "Transfer black cylinder to green platform", "output": "{\"object\": \"black cylinder\", \"initial_position\": \"table\", \"action\": \"move\", \"target_position\": \"green platform\"}"}
+{"instruction": "Relocate purple pyramid to right corner", "output": "{\"object\": \"purple pyramid\", \"initial_position\": \"green platform\", \"action\": \"move\", \"target_position\": \"right corner\"}"}
+{"instruction": "Make green cylinder 2 times bigger", "output": "{\"object\": \"green cylinder\", \"initial_position\": \"left corner\", \"action\": \"scale\", \"target_position\": \"2x original size\"}"}
+{"instruction": "Shrink orange pyramid to 0.25 its size", "output": "{\"object\": \"orange pyramid\", \"initial_position\": \"top shelf\", \"action\": \"scale\", \"target_position\": \"0.25x original size\"}"}
+{"instruction": "Rotate green box 180 degrees", "output": "{\"object\": \"green box\", \"initial_position\": \"red platform\", \"action\": \"rotate\", \"target_position\": \"180 degrees counterclockwise\"}"}
+{"instruction": "Shrink white cube to 0.25 its size", "output": "{\"object\": \"white cube\", \"initial_position\": \"red platform\", \"action\": \"scale\", \"target_position\": \"0.25x original size\"}"}
+{"instruction": "Move blue ball to green platform", "output": "{\"object\": \"blue ball\", \"initial_position\": \"center\", \"action\": \"move\", \"target_position\": \"green platform\"}"}
+{"instruction": "Resize yellow pyramid to 2x its size", "output": "{\"object\": \"yellow pyramid\", \"initial_position\": \"bottom shelf\", \"action\": \"scale\", \"target_position\": \"2x original size\"}"}
+{"instruction": "Turn red cone 180 degrees counterclockwise", "output": "{\"object\": \"red cone\", \"initial_position\": \"blue platform\", \"action\": \"rotate\", \"target_position\": \"180 degrees counterclockwise\"}"}
+{"instruction": "Shrink blue cone to 0.25 its size", "output": "{\"object\": \"blue cone\", \"initial_position\": \"right corner\", \"action\": \"scale\", \"target_position\": \"0.25x original size\"}"}
+{"instruction": "Shrink purple pyramid to 0.5 its size", "output": "{\"object\": \"purple pyramid\", \"initial_position\": \"floor\", \"action\": \"scale\", \"target_position\": \"0.5x original size\"}"}
+{"instruction": "Transfer green pyramid to bottom shelf", "output": "{\"object\": \"green pyramid\", \"initial_position\": \"blue platform\", \"action\": \"move\", \"target_position\": \"bottom shelf\"}"}
+{"instruction": "Place white cone on desk", "output": "{\"object\": \"white cone\", \"initial_position\": \"blue platform\", \"action\": \"move\", \"target_position\": \"desk\"}"}
+{"instruction": "Relocate blue pyramid to origin", "output": "{\"object\": \"blue pyramid\", \"initial_position\": \"green platform\", \"action\": \"move\", \"target_position\": \"origin\"}"}
+{"instruction": "Place purple cube on table", "output": "{\"object\": \"purple cube\", \"initial_position\": \"blue platform\", \"action\": \"move\", \"target_position\": \"table\"}"}
+{"instruction": "Move red cube to right corner", "output": "{\"object\": \"red cube\", \"initial_position\": \"floor\", \"action\": \"move\", \"target_position\": \"right corner\"}"}
+{"instruction": "Transfer green sphere to left corner", "output": "{\"object\": \"green sphere\", \"initial_position\": \"pedestal\", \"action\": \"move\", \"target_position\": \"left corner\"}"}

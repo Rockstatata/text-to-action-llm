@@ -5,7 +5,7 @@
 
 // Configuration
 const CONFIG = {
-    apiUrl: 'http://localhost:8000',
+    apiUrl: 'https://anthroponomical-jodi-mercilessly.ngrok-free.dev',
     endpoints: {
         infer: '/api/infer',
         health: '/health'
@@ -59,14 +59,19 @@ async function submitInstruction() {
     setLoading(true);
     const startTime = performance.now();
     
+    console.log('Submitting instruction to:', `${CONFIG.apiUrl}${CONFIG.endpoints.infer}`, 'with payload:', { instruction });
+    
     try {
         const response = await fetch(`${CONFIG.apiUrl}${CONFIG.endpoints.infer}`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
             },
             body: JSON.stringify({ instruction })
         });
+        
+        console.log('Received response:', response.status, response.statusText);
         
         const latency = Math.round(performance.now() - startTime);
         updateLatency(latency);
@@ -77,6 +82,7 @@ async function submitInstruction() {
         }
         
         const actionPlan = await response.json();
+        console.log('Action plan received:', actionPlan);
         lastActionPlan = actionPlan;
         
         // Display result
@@ -138,9 +144,17 @@ async function checkApiHealth() {
     const statusDot = document.getElementById('api-status');
     const statusText = document.getElementById('api-status-text');
     
+    console.log('Checking API health at:', `${CONFIG.apiUrl}${CONFIG.endpoints.health}`);
+    
     try {
-        const response = await fetch(`${CONFIG.apiUrl}${CONFIG.endpoints.health}`);
+        const response = await fetch(`${CONFIG.apiUrl}${CONFIG.endpoints.health}`, {
+            headers: {
+                'ngrok-skip-browser-warning': 'true'
+            }
+        });
         const data = await response.json();
+        
+        console.log('Health check response:', response.status, data);
         
         if (response.ok && data.status === 'healthy') {
             statusDot.className = 'status-dot connected';
@@ -150,6 +164,7 @@ async function checkApiHealth() {
             statusText.textContent = 'API Unhealthy';
         }
     } catch (error) {
+        console.error('Health check failed:', error);
         statusDot.className = 'status-dot error';
         statusText.textContent = 'API Offline';
     }
