@@ -1,485 +1,650 @@
-/**
- * Text-to-Action LLM - Scene Rendering
- * Simple 2D canvas-based scene for demonstrating actions
- */
-
-// Scene configuration - DYNAMIC, model-driven approach
-// Objects are created dynamically based on LLM output, not hardcoded
-const SCENE_CONFIG = {
-    // Keep some sample objects for initial demonstration
-    initialObjects: {
-        'orange pyramid': { x: 100, y: 200, width: 50, height: 60, color: '#f97316', shape: 'triangle' },
-        'yellow pyramid': { x: 180, y: 200, width: 50, height: 60, color: '#eab308', shape: 'triangle' },
-        'blue pyramid': { x: 260, y: 200, width: 50, height: 60, color: '#3b82f6', shape: 'triangle' },
-        'red box': { x: 340, y: 200, width: 50, height: 50, color: '#ef4444', shape: 'rect' },
-        'blue box': { x: 410, y: 200, width: 50, height: 50, color: '#3b82f6', shape: 'rect' },
-        'green cube': { x: 480, y: 200, width: 50, height: 50, color: '#22c55e', shape: 'rect' },
-        'yellow sphere': { x: 550, y: 200, radius: 25, color: '#eab308', shape: 'circle' },
-        'purple sphere': { x: 620, y: 200, radius: 25, color: '#a855f7', shape: 'circle' },
-        'black ball': { x: 690, y: 200, radius: 25, color: '#1f2937', shape: 'circle' },
-    },
-    // Dynamic position mapping - can be extended by model
-    knownPositions: {
-        'floor': { x: null, y: 220 },
-        'ground': { x: null, y: 220 },
-        'origin': { x: 50, y: 50 },
-        'center': { x: 400, y: 150 },
-        'top shelf': { x: 200, y: 50 },
-        'bottom shelf': { x: 600, y: 200 },
-        'left corner': { x: 50, y: 50 },
-        'right corner': { x: 750, y: 50 },
-        'blue platform': { x: 400, y: 100 },
-        'red platform': { x: 200, y: 100 },
-        'green platform': { x: 600, y: 100 },
-        'table': { x: 300, y: 180 },
-        'desk': { x: 500, y: 180 },
-        'pedestal': { x: 350, y: 120 },
-    },
-    // Color and shape mappings for dynamic object creation
-    colors: {
-        'red': '#ef4444', 'blue': '#3b82f6', 'green': '#22c55e',
-        'yellow': '#eab308', 'orange': '#f97316', 'purple': '#a855f7',
-        'black': '#1f2937', 'white': '#f0f0f0', 'pink': '#ec4899',
-        'cyan': '#06b6d4', 'gray': '#6b7280', 'brown': '#92400e'
-    },
-    shapes: {
-        'box': 'rect', 'cube': 'rect', 'pyramid': 'triangle',
-        'sphere': 'circle', 'ball': 'circle', 'circle': 'circle',
-        'cone': 'triangle', 'cylinder': 'rect'
-    }
-};
-
-// Scene state
-let canvas, ctx;
-let sceneObjects = {};
-let animationFrame = null;
-
-/**
- * Initialize the scene
- */
-function initializeScene() {
-    canvas = document.getElementById('scene-canvas');
-    if (!canvas) return;
+// Scene.js - 2D Graph Canvas with Coordinate System
+const Scene = (() => {
+    let canvas, ctx;
+    let objects = {};
+    let animations = [];
+    let animationFrame = null;
+    let hoveredCoords = null;
     
-    ctx = canvas.getContext('2d');
+    // Canvas settings
+    const GRID_SPACING = 50;
+    const AXIS_COLOR = '#475569';
+    const GRID_COLOR = '#1e293b';
+    const LABEL_COLOR = '#64748b';
     
-    // Set canvas size
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    // Platform/shelf storage
+    let platforms = [];
+    let customPositions = {}; // Store custom platform positions
     
-    // Initialize objects
-    resetScene();
-    
-    // Start render loop
-    render();
-}
-
-/**
- * Resize canvas to container
- */
-function resizeCanvas() {
-    const container = canvas.parentElement;
-    canvas.width = container.clientWidth;
-    canvas.height = container.clientHeight;
-}
-
-/**
- * Reset scene to initial state
- */
-function resetScene() {
-    sceneObjects = JSON.parse(JSON.stringify(SCENE_CONFIG.initialObjects));
-    
-    // Adjust positions based on canvas size
-    Object.values(sceneObjects).forEach(obj => {
-        obj.y = canvas.height - 80;
-    });
-}
-
-/**
- * Main render function
- */
-function render() {
-    // Clear canvas
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw grid
-    drawGrid();
-    
-    // Draw platforms
-    drawPlatforms();
-    
-    // Draw objects
-    Object.entries(sceneObjects).forEach(([name, obj]) => {
-        drawObject(obj, name);
-    });
-    
-    animationFrame = requestAnimationFrame(render);
-}
-
-/**
- * Draw background grid
- */
-function drawGrid() {
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 1;
-    
-    const gridSize = 40;
-    
-    for (let x = 0; x < canvas.width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-    }
-    
-    for (let y = 0; y < canvas.height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-    }
-}
-
-/**
- * Draw platform markers
- */
-function drawPlatforms() {
-    const platforms = [
-        { name: 'Blue Platform', x: 400, y: 100, color: '#3b82f6' },
-        { name: 'Red Platform', x: 200, y: 100, color: '#ef4444' },
-        { name: 'Green Platform', x: 600, y: 100, color: '#22c55e' },
-    ];
-    
-    platforms.forEach(platform => {
-        // Draw platform
-        ctx.fillStyle = platform.color + '40'; // Add transparency
-        ctx.fillRect(platform.x - 50, platform.y, 100, 10);
+    // Named positions (relative to canvas center for flexibility)
+    const getNamedPositions = () => {
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const positions = {
+            // Center
+            'center': { x: cx, y: cy },
+            
+            // Cardinal directions
+            'left': { x: cx - 200, y: cy },
+            'right': { x: cx + 200, y: cy },
+            'top': { x: cx, y: cy - 150 },
+            'bottom': { x: cx, y: cy + 150 },
+            
+            // Corners
+            'top left': { x: cx - 200, y: cy - 150 },
+            'top right': { x: cx + 200, y: cy - 150 },
+            'bottom left': { x: cx - 200, y: cy + 150 },
+            'bottom right': { x: cx + 200, y: cy + 150 },
+            
+            // Platforms
+            'red platform': { x: cx - 180, y: cy + 100 },
+            'blue platform': { x: cx + 180, y: cy + 100 },
+            'green platform': { x: cx, y: cy + 100 },
+            'platform a': { x: cx - 180, y: cy + 100 },
+            'platform b': { x: cx + 180, y: cy + 100 },
+            'platform c': { x: cx, y: cy + 100 },
+            'left platform': { x: cx - 180, y: cy + 100 },
+            'right platform': { x: cx + 180, y: cy + 100 },
+            'middle platform': { x: cx, y: cy + 100 },
+            
+            // Shelves
+            'top shelf': { x: cx, y: cy - 120 },
+            'bottom shelf': { x: cx, y: cy + 120 },
+            'left shelf': { x: cx - 180, y: cy },
+            'right shelf': { x: cx + 180, y: cy },
+            
+            // Table/Floor
+            'table': { x: cx, y: cy + 80 },
+            'floor': { x: cx, y: cy + 150 },
+            'ground': { x: cx, y: cy + 150 },
+            
+            // Corners explicit
+            'corner': { x: cx + 200, y: cy + 150 },
+        };
         
-        // Draw label
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '11px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(platform.name, platform.x, platform.y - 5);
-    });
-    
-    // Draw shelves
-    const shelves = [
-        { name: 'Top Shelf', x: 200, y: 50 },
-        { name: 'Bottom Shelf', x: 600, y: 200 },
-    ];
-    
-    shelves.forEach(shelf => {
-        ctx.strokeStyle = '#64748b';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(shelf.x - 40, shelf.y);
-        ctx.lineTo(shelf.x + 40, shelf.y);
-        ctx.stroke();
-        
-        ctx.fillStyle = '#64748b';
-        ctx.font = '10px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(shelf.name, shelf.x, shelf.y - 5);
-    });
-    
-    // Draw floor line
-    ctx.strokeStyle = '#475569';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height - 20);
-    ctx.lineTo(canvas.width, canvas.height - 20);
-    ctx.stroke();
-    
-    ctx.fillStyle = '#64748b';
-    ctx.font = '12px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Floor', 10, canvas.height - 5);
-}
-
-/**
- * Draw a scene object
- */
-function drawObject(obj, name) {
-    ctx.fillStyle = obj.color;
-    
-    if (obj.shape === 'circle') {
-        ctx.beginPath();
-        ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
-        ctx.fill();
-    } else if (obj.shape === 'triangle') {
-        // Draw pyramid/triangle
-        ctx.beginPath();
-        ctx.moveTo(obj.x, obj.y - obj.height);  // Top point
-        ctx.lineTo(obj.x - obj.width / 2, obj.y);  // Bottom left
-        ctx.lineTo(obj.x + obj.width / 2, obj.y);  // Bottom right
-        ctx.closePath();
-        ctx.fill();
-    } else {
-        // Draw rectangle/box/cube
-        ctx.fillRect(
-            obj.x - obj.width / 2,
-            obj.y - obj.height,
-            obj.width,
-            obj.height
-        );
-    }
-    
-    // Draw shadow
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.beginPath();
-    ctx.ellipse(obj.x, canvas.height - 18, 25, 8, 0, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Draw label
-    ctx.fillStyle = '#e2e8f0';
-    ctx.font = '11px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(name, obj.x, obj.y - (obj.height || obj.radius) - 5);
-}
-
-/**
- * Create object dynamically from model output
- * This demonstrates the model's reasoning - it can work with ANY object
- */
-function createObjectFromModelOutput(objectName, initialPosition) {
-    console.log('  - Model specified object:', objectName);
-    console.log('  - Model specified initial position:', initialPosition);
-    
-    const nameLower = objectName.toLowerCase();
-    
-    // Extract color and shape from object name using model output
-    let color = '#94a3b8'; // default gray
-    let shape = 'rect';  // default shape
-    
-    // Parse color from model output
-    for (const [colorName, colorHex] of Object.entries(SCENE_CONFIG.colors)) {
-        if (nameLower.includes(colorName)) {
-            color = colorHex;
-            break;
-        }
-    }
-    
-    // Parse shape from model output
-    for (const [shapeName, shapeType] of Object.entries(SCENE_CONFIG.shapes)) {
-        if (nameLower.includes(shapeName)) {
-            shape = shapeType;
-            break;
-        }
-    }
-    
-    // Get initial position from model output
-    const pos = resolvePosition(initialPosition) || { x: 400, y: 150 };
-    
-    // Create object based on shape
-    const obj = {
-        x: pos.x !== null ? pos.x : 400,
-        y: pos.y !== null ? pos.y : 150,
-        color: color,
-        shape: shape
+        // Merge with custom platform positions
+        return { ...positions, ...customPositions };
     };
     
-    // Add shape-specific properties
-    if (shape === 'circle') {
-        obj.radius = 25;
-    } else if (shape === 'triangle') {
-        obj.width = 50;
-        obj.height = 60;
-    } else {
-        obj.width = 50;
-        obj.height = 50;
-    }
+    // Initialize canvas
+    const init = (canvasId) => {
+        canvas = document.getElementById(canvasId);
+        ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Track mouse for coordinate display
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mouseleave', () => {
+            hoveredCoords = null;
+            updateCoordDisplay();
+        });
+        
+        startRenderLoop();
+        return true;
+    };
     
-    console.log('  ✓ Created:', obj);
-    return obj;
-}
-
-/**
- * Resolve position from model output
- * Can handle known positions or infer new ones
- */
-function resolvePosition(positionName) {
-    if (!positionName) return null;
+    const resizeCanvas = () => {
+        const container = canvas.parentElement;
+        const rect = container.getBoundingClientRect();
+        canvas.width = rect.width || 800;
+        canvas.height = rect.height || 450;
+        
+        // Reinitialize default platforms after resize
+        initDefaultPlatforms();
+    };
     
-    const posLower = positionName.toLowerCase();
+    const handleMouseMove = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.round(e.clientX - rect.left);
+        const y = Math.round(e.clientY - rect.top);
+        hoveredCoords = { x, y };
+        updateCoordDisplay();
+    };
     
-    // Check known positions first
-    for (const [name, pos] of Object.entries(SCENE_CONFIG.knownPositions)) {
-        if (posLower.includes(name) || name.includes(posLower)) {
-            return pos;
+    const updateCoordDisplay = () => {
+        const display = document.getElementById('coord-display');
+        if (display) {
+            if (hoveredCoords) {
+                display.textContent = `Cursor: (${hoveredCoords.x}, ${hoveredCoords.y})`;
+            } else {
+                display.textContent = 'Hover over canvas for coordinates';
+            }
         }
-    }
+    };
     
-    // For unknown positions, try to infer from model output
-    // This shows the system adapts to model reasoning
-    console.log('  ⚠ Unknown position from model:', positionName, '- using default');
-    return { x: 400, y: 150 }; // center as fallback
-}
-
-/**
- * Execute an action in the scene - FULLY DYNAMIC, MODEL-DRIVEN
- * This demonstrates that the model infers everything, not hardcoded rules
- */
-function executeSceneAction(actionPlan) {
-    const { object, initial_position, action, target_position } = actionPlan;
-    
-    console.log('🤖 Model-inferred action:', actionPlan);
-    
-    // Try to find existing object (fuzzy match)
-    let objName = Object.keys(sceneObjects).find(name => 
-        name.toLowerCase().includes(object.toLowerCase()) ||
-        object.toLowerCase().includes(name.toLowerCase())
-    );
-    
-    let obj;
-    
-    // If object doesn't exist, CREATE IT DYNAMICALLY from model output
-    // This proves the model drives the system, not hardcoded objects
-    if (!objName) {
-        console.log('📦 Creating new object from model output:', object);
-        obj = createObjectFromModelOutput(object, initial_position);
-        objName = object;
-        sceneObjects[objName] = obj;
-    } else {
-        obj = sceneObjects[objName];
-        // Update initial position based on model output
-        const initialPos = resolvePosition(initial_position);
-        if (initialPos) {
-            obj.x = initialPos.x !== null ? initialPos.x : obj.x;
-            obj.y = initialPos.y !== null ? initialPos.y : obj.y;
+    // Initialize default platforms and shelves
+    const initDefaultPlatforms = () => {
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        
+        platforms = [
+            // Floor
+            { x: 0, y: cy + 150, width: canvas.width, height: 8, color: '#334155', label: 'Floor' },
+            
+            // Three platforms
+            { x: cx - 200, y: cy + 100, width: 100, height: 12, color: '#dc2626', label: 'Red Platform' },
+            { x: cx + 100, y: cy + 100, width: 100, height: 12, color: '#2563eb', label: 'Blue Platform' },
+            { x: cx - 50, y: cy + 100, width: 100, height: 12, color: '#16a34a', label: 'Green Platform' },
+            
+            // Shelves
+            { x: cx - 100, y: cy - 120, width: 200, height: 10, color: '#78716c', label: 'Top Shelf' },
+            { x: cx - 100, y: cy + 120, width: 200, height: 10, color: '#78716c', label: 'Bottom Shelf' },
+            { x: cx - 200, y: cy, width: 80, height: 10, color: '#78716c', label: 'Left Shelf' },
+            { x: cx + 120, y: cy, width: 80, height: 10, color: '#78716c', label: 'Right Shelf' },
+        ];
+        
+        // Register all default platforms as named positions
+        customPositions = {};
+        for (const platform of platforms) {
+            const normalizedLabel = platform.label.toLowerCase().trim();
+            customPositions[normalizedLabel] = {
+                x: platform.x + platform.width / 2,
+                y: platform.y  // Top surface
+            };
         }
-    }
+    };
     
-    // Store initial state for before/after comparison
-    obj.initialState = { x: obj.x, y: obj.y, width: obj.width, height: obj.height, radius: obj.radius };
-    
-    // Execute action based on model output
-    switch (action.toLowerCase()) {
-        case 'move':
-            animateMove(obj, target_position, objName);
-            break;
-        case 'rotate':
-            animateRotate(obj, target_position);
-            break;
-        case 'scale':
-            animateScale(obj, target_position);
-            break;
-        default:
-            console.log('Unknown action:', action);
-    }
-}
-
-/**
- * Animate move action - driven by model output
- */
-function animateMove(obj, targetPositionName, objName) {
-    console.log(`  🎬 Animating MOVE: ${objName} -> ${targetPositionName}`);
-    
-    // Resolve target position from model output
-    const targetPos = resolvePosition(targetPositionName);
-    
-    if (!targetPos) {
-        console.error('Could not resolve target position:', targetPositionName);
-        return;
-    }
-    
-    const targetX = targetPos.x !== null ? targetPos.x : obj.x;
-    const targetY = targetPos.y !== null ? targetPos.y : obj.y;
-    
-    const startX = obj.x;
-    const startY = obj.y;
-    const duration = 1500;
-    const startTime = performance.now();
-    
-    console.log(`  📍 From (${Math.round(startX)}, ${Math.round(startY)}) -> To (${Math.round(targetX)}, ${Math.round(targetY)})`);
-    
-    function animate(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Smooth ease-in-out
-        const eased = progress < 0.5
-            ? 4 * progress * progress * progress
-            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-        
-        obj.x = startX + (targetX - startX) * eased;
-        obj.y = startY + (targetY - startY) * eased;
-        
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            console.log('  ✓ Move complete');
+    // Draw platforms and shelves
+    const drawPlatforms = () => {
+        for (const platform of platforms) {
+            // Shadow
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+            ctx.shadowBlur = 6;
+            ctx.shadowOffsetY = 3;
+            
+            // Platform
+            ctx.fillStyle = platform.color;
+            ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+            
+            // Highlight
+            ctx.shadowColor = 'transparent';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.fillRect(platform.x, platform.y, platform.width, platform.height / 2);
+            
+            // Label
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '11px Segoe UI, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(platform.label, platform.x + platform.width / 2, platform.y - 6);
         }
-    }
+    };
     
-    requestAnimationFrame(animate);
-}
-
-/**
- * Animate rotate action (visual effect)
- */
-function animateRotate(obj) {
-    const originalWidth = obj.width;
-    const duration = 800;
-    const startTime = performance.now();
-    
-    function animate(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
+    // Draw coordinate grid
+    const drawGrid = () => {
+        ctx.strokeStyle = GRID_COLOR;
+        ctx.lineWidth = 1;
         
-        // Simulate rotation by scaling width
-        obj.width = originalWidth * Math.abs(Math.cos(progress * Math.PI * 2));
-        
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            obj.width = originalWidth;
-        }
-    }
-    
-    if (obj.width) {
-        requestAnimationFrame(animate);
-    }
-}
-
-/**
- * Animate scale action
- */
-function animateScale(obj, target) {
-    // Parse scale factor from target
-    let scaleFactor = 2;
-    const match = target.match(/(\d+\.?\d*)/);
-    if (match) {
-        scaleFactor = parseFloat(match[1]);
-        if (scaleFactor < 1) scaleFactor = 0.5;
-    }
-    
-    const startWidth = obj.width || obj.radius * 2;
-    const startHeight = obj.height || obj.radius * 2;
-    const targetWidth = startWidth * scaleFactor;
-    const targetHeight = startHeight * scaleFactor;
-    
-    const duration = 600;
-    const startTime = performance.now();
-    
-    function animate(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Elastic ease
-        const eased = 1 - Math.pow(1 - progress, 4);
-        
-        if (obj.width) {
-            obj.width = startWidth + (targetWidth - startWidth) * eased;
-            obj.height = startHeight + (targetHeight - startHeight) * eased;
-        } else {
-            obj.radius = (startWidth / 2) + ((targetWidth - startWidth) / 2) * eased;
+        // Vertical lines
+        for (let x = 0; x <= canvas.width; x += GRID_SPACING) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+            ctx.stroke();
         }
         
-        if (progress < 1) {
-            requestAnimationFrame(animate);
+        // Horizontal lines
+        for (let y = 0; y <= canvas.height; y += GRID_SPACING) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.stroke();
         }
-    }
+        
+        // Draw axes
+        ctx.strokeStyle = AXIS_COLOR;
+        ctx.lineWidth = 2;
+        
+        // X-axis at top
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(canvas.width, 0);
+        ctx.stroke();
+        
+        // Y-axis at left
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, canvas.height);
+        ctx.stroke();
+        
+        // Axis labels
+        ctx.fillStyle = LABEL_COLOR;
+        ctx.font = '10px Consolas, monospace';
+        ctx.textAlign = 'center';
+        
+        // X labels (every 100px for clarity)
+        for (let x = 0; x <= canvas.width; x += 100) {
+            ctx.fillText(x.toString(), x, 12);
+        }
+        
+        // Y labels
+        ctx.textAlign = 'left';
+        for (let y = 100; y <= canvas.height; y += 100) {
+            ctx.fillText(y.toString(), 4, y + 4);
+        }
+    };
     
-    requestAnimationFrame(animate);
-}
+    // Parse target position - supports both named positions and coordinates
+    const resolvePosition = (target) => {
+        if (!target) return null;
+        
+        const str = String(target).toLowerCase().trim();
+        
+        // Try coordinate format: "(x, y)" or "x, y" or "x:123 y:456"
+        const coordMatch = str.match(/\(?\s*(\d+)\s*,\s*(\d+)\s*\)?/) ||
+                          str.match(/x\s*:\s*(\d+)\s*y\s*:\s*(\d+)/i) ||
+                          str.match(/^(\d+)\s+(\d+)$/);
+        
+        if (coordMatch) {
+            return {
+                x: parseInt(coordMatch[1]),
+                y: parseInt(coordMatch[2])
+            };
+        }
+        
+        // Try named position
+        const positions = getNamedPositions();
+        
+        // Direct match
+        if (positions[str]) {
+            return { ...positions[str] };
+        }
+        
+        // Normalize and match
+        const normalized = str.replace(/_/g, ' ').replace(/-/g, ' ').trim();
+        if (positions[normalized]) {
+            return { ...positions[normalized] };
+        }
+        
+        // Partial match
+        for (const [key, pos] of Object.entries(positions)) {
+            if (str.includes(key) || key.includes(str)) {
+                return { ...pos };
+            }
+        }
+        
+        // Return center as fallback
+        return { x: canvas.width / 2, y: canvas.height / 2 };
+    };
+    
+    // Add object to scene
+    const addObject = (name, config) => {
+        const position = resolvePosition(config.position) || { 
+            x: config.x || canvas.width / 2, 
+            y: config.y || canvas.height / 2 
+        };
+        
+        objects[name] = {
+            name,
+            type: config.type || 'box',
+            color: config.color || '#3b82f6',
+            x: position.x,
+            y: position.y,
+            width: config.width || 50,
+            height: config.height || 50,
+            rotation: 0,
+            scale: 1,
+            opacity: 1
+        };
+        
+        return objects[name];
+    };
+    
+    // Remove object
+    const removeObject = (name) => {
+        const key = findObjectKey(name);
+        if (key) {
+            delete objects[key];
+            return true;
+        }
+        return false;
+    };
+    
+    // Find object by name (case-insensitive, normalized)
+    const findObjectKey = (name) => {
+        if (!name) return null;
+        const normalized = String(name).toLowerCase().replace(/_/g, ' ').replace(/-/g, ' ').trim();
+        
+        for (const key of Object.keys(objects)) {
+            const keyNorm = key.toLowerCase().replace(/_/g, ' ').replace(/-/g, ' ').trim();
+            if (keyNorm === normalized || keyNorm.includes(normalized) || normalized.includes(keyNorm)) {
+                return key;
+            }
+        }
+        return null;
+    };
+    
+    const getObject = (name) => {
+        const key = findObjectKey(name);
+        return key ? objects[key] : null;
+    };
+    
+    // Get all objects
+    const getObjects = () => ({ ...objects });
+    
+    // Clear all objects
+    const clearObjects = () => {
+        objects = {};
+        animations = [];
+    };
+    
+    // Execute action
+    const executeAction = (action) => {
+        return new Promise((resolve) => {
+            const obj = getObject(action.object);
+            if (!obj) {
+                console.warn(`Object not found: ${action.object}`);
+                resolve(false);
+                return;
+            }
+            
+            const actionType = String(action.action || '').toLowerCase();
+            const duration = 800;
+            
+            switch (actionType) {
+                case 'move':
+                case 'slide':
+                case 'push':
+                case 'pull':
+                case 'drag':
+                    const target = resolvePosition(action.target_position);
+                    if (target) {
+                        animate(obj, { x: target.x, y: target.y }, duration, resolve);
+                    } else {
+                        resolve(false);
+                    }
+                    break;
+                    
+                case 'jump':
+                case 'hop':
+                    const jumpTarget = resolvePosition(action.target_position);
+                    animateJump(obj, jumpTarget, duration, resolve);
+                    break;
+                    
+                case 'rotate':
+                case 'spin':
+                case 'turn':
+                    const degrees = parseFloat(action.target_position) || 360;
+                    animate(obj, { rotation: obj.rotation + degrees }, duration, resolve);
+                    break;
+                    
+                case 'grow':
+                case 'expand':
+                    animate(obj, { scale: obj.scale * 1.5 }, duration, resolve);
+                    break;
+                    
+                case 'shrink':
+                case 'contract':
+                    animate(obj, { scale: obj.scale * 0.6 }, duration, resolve);
+                    break;
+                    
+                case 'fade':
+                case 'fadeout':
+                case 'disappear':
+                    animate(obj, { opacity: 0 }, duration, resolve);
+                    break;
+                    
+                case 'fadein':
+                case 'appear':
+                    animate(obj, { opacity: 1 }, duration, resolve);
+                    break;
+                    
+                case 'bounce':
+                    animateBounce(obj, duration, resolve);
+                    break;
+                    
+                default:
+                    // Try to move if target_position exists
+                    if (action.target_position) {
+                        const defaultTarget = resolvePosition(action.target_position);
+                        if (defaultTarget) {
+                            animate(obj, { x: defaultTarget.x, y: defaultTarget.y }, duration, resolve);
+                        } else {
+                            resolve(false);
+                        }
+                    } else {
+                        resolve(false);
+                    }
+            }
+        });
+    };
+    
+    // Animation with easing
+    const animate = (obj, targetProps, duration, onComplete) => {
+        const startProps = {};
+        for (const key of Object.keys(targetProps)) {
+            startProps[key] = obj[key];
+        }
+        
+        const startTime = performance.now();
+        
+        const animation = {
+            obj,
+            startProps,
+            targetProps,
+            startTime,
+            duration,
+            onComplete
+        };
+        
+        animations.push(animation);
+    };
+    
+    const animateJump = (obj, target, duration, onComplete) => {
+        const startX = obj.x;
+        const startY = obj.y;
+        const endX = target ? target.x : obj.x;
+        const endY = target ? target.y : obj.y;
+        const peakY = Math.min(startY, endY) - 100;
+        
+        const startTime = performance.now();
+        
+        const jumpAnim = {
+            obj,
+            startTime,
+            duration,
+            update: (progress) => {
+                obj.x = startX + (endX - startX) * progress;
+                // Parabolic arc
+                const arc = -4 * progress * (progress - 1);
+                const baseY = startY + (endY - startY) * progress;
+                obj.y = baseY - arc * (startY - peakY);
+            },
+            onComplete
+        };
+        
+        animations.push(jumpAnim);
+    };
+    
+    const animateBounce = (obj, duration, onComplete) => {
+        const startY = obj.y;
+        const bounceHeight = 50;
+        const startTime = performance.now();
+        
+        const bounceAnim = {
+            obj,
+            startTime,
+            duration,
+            update: (progress) => {
+                const bounces = 3;
+                const decay = Math.pow(0.5, progress * bounces);
+                const wave = Math.abs(Math.sin(progress * Math.PI * bounces));
+                obj.y = startY - wave * bounceHeight * decay;
+            },
+            onComplete
+        };
+        
+        animations.push(bounceAnim);
+    };
+    
+    // Easing function
+    const easeInOutCubic = (t) => {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    };
+    
+    // Update animations
+    const updateAnimations = () => {
+        const now = performance.now();
+        
+        for (let i = animations.length - 1; i >= 0; i--) {
+            const anim = animations[i];
+            const elapsed = now - anim.startTime;
+            const progress = Math.min(elapsed / anim.duration, 1);
+            const eased = easeInOutCubic(progress);
+            
+            if (anim.update) {
+                // Custom update function
+                anim.update(eased);
+            } else {
+                // Standard property animation
+                for (const [key, targetVal] of Object.entries(anim.targetProps)) {
+                    const startVal = anim.startProps[key];
+                    anim.obj[key] = startVal + (targetVal - startVal) * eased;
+                }
+            }
+            
+            if (progress >= 1) {
+                animations.splice(i, 1);
+                if (anim.onComplete) anim.onComplete(true);
+            }
+        }
+    };
+    
+    // Draw object
+    const drawObject = (obj) => {
+        ctx.save();
+        ctx.globalAlpha = obj.opacity;
+        ctx.translate(obj.x, obj.y);
+        ctx.rotate((obj.rotation * Math.PI) / 180);
+        ctx.scale(obj.scale, obj.scale);
+        
+        const w = obj.width;
+        const h = obj.height;
+        
+        // Shadow
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 4;
+        
+        ctx.fillStyle = obj.color;
+        
+        switch (obj.type) {
+            case 'circle':
+            case 'ball':
+            case 'sphere':
+                ctx.beginPath();
+                ctx.arc(0, 0, w / 2, 0, Math.PI * 2);
+                ctx.fill();
+                // Highlight
+                ctx.shadowColor = 'transparent';
+                ctx.beginPath();
+                ctx.arc(-w / 6, -h / 6, w / 6, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                ctx.fill();
+                break;
+                
+            case 'triangle':
+                ctx.beginPath();
+                ctx.moveTo(0, -h / 2);
+                ctx.lineTo(-w / 2, h / 2);
+                ctx.lineTo(w / 2, h / 2);
+                ctx.closePath();
+                ctx.fill();
+                break;
+                
+            default: // box/cube/square
+                ctx.fillRect(-w / 2, -h / 2, w, h);
+                // Highlight
+                ctx.shadowColor = 'transparent';
+                ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                ctx.fillRect(-w / 2, -h / 2, w, h / 3);
+        }
+        
+        ctx.restore();
+        
+        // Draw label with coordinates
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '11px Segoe UI, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(obj.name, obj.x, obj.y + obj.height / 2 + 16);
+        ctx.font = '9px Consolas, monospace';
+        ctx.fillStyle = '#64748b';
+        ctx.fillText(`(${Math.round(obj.x)}, ${Math.round(obj.y)})`, obj.x, obj.y + obj.height / 2 + 28);
+    };
+    
+    // Render loop
+    const render = () => {
+        if (!ctx) return;
+        
+        // Clear
+        ctx.fillStyle = '#0a0f1a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw grid
+        drawGrid();
+        
+        // Draw platforms and shelves (behind objects)
+        drawPlatforms();
+        
+        // Update animations
+        updateAnimations();
+        
+        // Draw objects
+        for (const obj of Object.values(objects)) {
+            drawObject(obj);
+        }
+    };
+    
+    const startRenderLoop = () => {
+        const loop = () => {
+            render();
+            animationFrame = requestAnimationFrame(loop);
+        };
+        loop();
+    };
+    
+    // Get list of named positions for UI
+    const getPositionNames = () => {
+        return Object.keys(getNamedPositions()).sort();
+    };
+    
+    // Public API
+    return {
+        init,
+        addObject,
+        removeObject,
+        getObject,
+        getObjects,
+        clearObjects,
+        executeAction,
+        resolvePosition,
+        getPositionNames,
+        isAnimating: () => animations.length > 0,
+        addPlatform: (config) => {
+            const platform = {
+                x: config.x || 0,
+                y: config.y || 0,
+                width: config.width || 100,
+                height: config.height || 10,
+                color: config.color || '#78716c',
+                label: config.label || 'Platform'
+            };
+            platforms.push(platform);
+            
+            // Register as named position (center of platform)
+            const normalizedLabel = platform.label.toLowerCase().trim();
+            customPositions[normalizedLabel] = {
+                x: platform.x + platform.width / 2,
+                y: platform.y  // Top surface of platform
+            };
+        },
+        getPlatforms: () => [...platforms],
+        clearPlatforms: () => { 
+            platforms = []; 
+            customPositions = {}; 
+            initDefaultPlatforms(); 
+        }
+    };
+})();

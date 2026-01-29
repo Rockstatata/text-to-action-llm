@@ -2,7 +2,7 @@
 Pydantic schemas for request/response validation.
 """
 
-from typing import Literal
+from typing import Literal, Optional, List
 from pydantic import BaseModel, Field
 
 
@@ -13,24 +13,19 @@ class InferenceRequest(BaseModel):
         ...,
         description="Natural language instruction to convert",
         min_length=1,
-        max_length=500,
-        examples=["Move the red box to the blue platform"]
+        max_length=1000,
+        examples=["Move the red box to the blue platform", 
+                  "Move the red box to the top shelf, then rotate the green sphere 90 degrees"]
     )
 
 
-class ActionPlan(BaseModel):
-    """Structured action plan output from LLM."""
+class ActionStep(BaseModel):
+    """Single action step in a sequence."""
     
     object: str = Field(
         ...,
         description="The object to manipulate",
         examples=["red box", "green sphere"]
-    )
-    
-    initial_position: str = Field(
-        ...,
-        description="Current position of the object",
-        examples=["floor", "center", "table"]
     )
     
     action: Literal["move", "rotate", "scale"] = Field(
@@ -44,13 +39,36 @@ class ActionPlan(BaseModel):
         examples=["blue platform", "90 degrees clockwise", "2x original size"]
     )
     
+    initial_position: Optional[str] = Field(
+        None,
+        description="Current position of the object (optional)",
+        examples=["floor", "center", "table"]
+    )
+
+
+class ActionPlan(BaseModel):
+    """Structured action plan output from LLM - supports single or chained actions."""
+    
+    sequence: List[ActionStep] = Field(
+        default_factory=list,
+        description="Sequence of action steps to execute"
+    )
+    
     class Config:
         json_schema_extra = {
             "example": {
-                "object": "red box",
-                "initial_position": "floor",
-                "action": "move",
-                "target_position": "blue platform"
+                "sequence": [
+                    {
+                        "object": "red box",
+                        "action": "move",
+                        "target_position": "blue platform"
+                    },
+                    {
+                        "object": "green sphere",
+                        "action": "rotate",
+                        "target_position": "90 degrees clockwise"
+                    }
+                ]
             }
         }
 

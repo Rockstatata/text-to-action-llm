@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text-to-Action LLM Demo</title>
+    <title>Text-to-Action LLM</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,120 +11,155 @@
         <!-- Header -->
         <header class="header">
             <h1>Text-to-Action LLM</h1>
-            <p>Model-Driven Spatial Reasoning - LLaMA infers actions, not hardcoded rules</p>
+            <p>Local LLaMA Model | Structured JSON Output | Coordinate-Based Movement</p>
         </header>
 
-        <!-- Model Capabilities Info -->
-        <section class="model-info">
-            <div class="info-badge">
-                <strong>Model-Driven:</strong> System creates objects dynamically from LLM output
+        <!-- Input Section - Full Width Top -->
+        <section class="input-section-full">
+            <div class="input-header">
+                <h3>Natural Language Instruction</h3>
+                <div class="input-hints">
+                    <span class="hint">Named positions: floor, center, platforms, shelves, corners</span>
+                    <span class="hint">Coordinates: (x, y) e.g., "move to (400, 200)"</span>
+                </div>
             </div>
-            <div class="info-badge">
-                <strong>No Hardcoding:</strong> Model infers object, position, and action
-            </div>
-            <div class="info-badge">
-                <strong>Visual Proof:</strong> Before → After transformation driven by model
-            </div>
-        </section>
-
-        <!-- Action Types Info -->
-        <section class="action-types">
-            <div class="action-type">
-                <h3>Move</h3>
-                <p>Place, Put, Transfer, Relocate, Move</p>
-            </div>
-            <div class="action-type">
-                <h3>Rotate</h3>
-                <p>Turn, Spin, Rotate (degrees + direction)</p>
-            </div>
-            <div class="action-type">
-                <h3>Scale</h3>
-                <p>Make bigger/smaller, Shrink, Resize</p>
-            </div>
-        </section>
-
-        <!-- Input Section -->
-        <section class="input-section">
-            <div class="input-group">
-                <label for="instruction">Enter any spatial instruction:</label>
-                <input 
-                    type="text" 
-                    id="instruction" 
-                    placeholder="Try any object/color: Move cyan box to red platform"
-                    autocomplete="off"
-                >
-                <button id="submit-btn" onclick="submitInstruction()">
-                    <span id="btn-text">Generate Action</span>
-                    <span id="btn-loader" class="loader hidden"></span>
+            <div class="input-row">
+                <textarea 
+                    id="instruction-input" 
+                    placeholder="Enter instruction: 'Move the red box to the blue platform' or 'Move red box to (500, 150)' or chain commands with 'then'"
+                    rows="2"
+                ></textarea>
+                <button id="send-btn">
+                    <span id="send-text">Execute</span>
+                    <span id="send-loader" class="loader hidden"></span>
                 </button>
             </div>
-            
-            <!-- Quick Examples -->
             <div class="examples">
-                <span>Try any object:</span>
-                <button class="example-btn" onclick="setExample('Place orange pyramid on top shelf')">
-                    Move Object
-                </button>
-                <button class="example-btn" onclick="setExample('Move pink cylinder to green platform')">
-                    New Object
-                </button>
-                <button class="example-btn" onclick="setExample('Turn yellow pyramid 90 degrees counterclockwise')">
-                    Rotate
-                </button>
-                <button class="example-btn" onclick="setExample('Shrink brown cone to 0.25 its size')">
-                    Scale Dynamic
-                </button>
-                <button class="example-btn" onclick="setExample('Transfer cyan sphere to pedestal')">
-                    Custom Color
-                </button>
+                <button class="example-btn" data-text="Move the red box to the blue platform">Move to Platform</button>
+                <button class="example-btn" data-text="Move the blue ball to coordinates (600, 100)">Move to Coordinates</button>
+                <button class="example-btn" data-text="Move the red box to (200, 150), then move the blue ball to (500, 200)">Chained + Coords</button>
+                <button class="example-btn" data-text="Jump the blue ball to the top shelf">Jump</button>
+                <button class="example-btn" data-text="Bounce the red box">Bounce</button>
             </div>
         </section>
 
-        <!-- Scene Section -->
+        <!-- Scene Section - Full Width -->
         <section class="scene-section">
+            <div class="section-header">
+                <h3>2D Coordinate Scene</h3>
+                <div class="coord-display" id="coord-display">Hover over canvas for coordinates</div>
+                <div class="scene-controls">
+                    <button class="control-btn" id="reset-scene-btn">Reset</button>
+                    <button class="control-btn danger" id="clear-objects-btn">Clear All</button>
+                </div>
+            </div>
             <div class="scene-container">
                 <canvas id="scene-canvas"></canvas>
-                <div id="scene-overlay" class="scene-overlay hidden">
-                    <div class="action-indicator" id="action-indicator"></div>
+                <div id="action-overlay" class="scene-overlay hidden">
+                    <div class="action-indicator">Executing...</div>
                 </div>
             </div>
         </section>
 
-        <!-- Output Section -->
-        <section class="output-section">
-            <div class="output-header">
-                <h3>Model-Inferred Action Plan</h3>
-                <button id="copy-btn" class="copy-btn" onclick="copyOutput()" title="Copy JSON">
-                    Copy
-                </button>
+        <!-- Bottom Grid: Object Management | Output + Log -->
+        <div class="bottom-grid">
+            <!-- Left: Object Management -->
+            <section class="object-panel">
+                <div class="section-header">
+                    <h3>Object Management</h3>
+                    <span class="object-count"><span id="object-count">0</span> objects</span>
+                </div>
+                
+                <!-- Add Object Form -->
+                <div class="add-object-form">
+                    <div class="form-row">
+                        <select id="obj-color" class="form-select">
+                            <option value="#ef4444">Red</option>
+                            <option value="#3b82f6" selected>Blue</option>
+                            <option value="#22c55e">Green</option>
+                            <option value="#eab308">Yellow</option>
+                            <option value="#f97316">Orange</option>
+                            <option value="#8b5cf6">Purple</option>
+                            <option value="#ec4899">Pink</option>
+                            <option value="#6b7280">Gray</option>
+                        </select>
+                        <select id="obj-type" class="form-select">
+                            <option value="box" selected>Box</option>
+                            <option value="circle">Circle</option>
+                            <option value="triangle">Triangle</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <input type="number" id="obj-x" class="form-input" placeholder="X" value="400">
+                        <input type="number" id="obj-y" class="form-input" placeholder="Y" value="300">
+                        <button class="add-btn" id="add-obj-btn">Add Object</button>
+                    </div>
+                    <div class="form-row">
+                        <select id="position-select" class="form-select full-width">
+                            <option value="">Custom (use X, Y)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="object-list" id="object-list"></div>
+                
+                <!-- Add Platform/Shelf Form -->
+                <div class="add-object-form" style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border);">
+                    <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--muted);">Add Platform/Shelf</div>
+                    <div class="form-row">
+                        <input type="text" id="platform-label" class="form-select" placeholder="Label" value="My Platform">
+                        <select id="platform-color" class="form-select">
+                            <option value="#78716c" selected>Gray</option>
+                            <option value="#dc2626">Red</option>
+                            <option value="#2563eb">Blue</option>
+                            <option value="#16a34a">Green</option>
+                            <option value="#ca8a04">Yellow</option>
+                            <option value="#334155">Dark Gray</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <input type="number" id="platform-x" class="form-input" placeholder="X" value="300">
+                        <input type="number" id="platform-y" class="form-input" placeholder="Y" value="200">
+                        <input type="number" id="platform-width" class="form-input" placeholder="W" value="120">
+                        <button class="add-btn" id="add-platform-btn">Add Platform</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right: Output + Log stacked -->
+            <div class="right-stack">
+                <!-- Model Output -->
+                <section class="output-section">
+                    <div class="section-header">
+                        <h3>Model Output (JSON)</h3>
+                        <button class="copy-btn" id="copy-json-btn">Copy</button>
+                    </div>
+                    <pre id="output-json" class="output-json">Model response will appear here...</pre>
+                </section>
+
+                <!-- Execution Log -->
+                <section class="log-section">
+                    <div class="section-header">
+                        <h3>Execution Log</h3>
+                        <button class="control-btn small" id="clear-log-btn">Clear</button>
+                    </div>
+                    <div class="log-container" id="log-container"></div>
+                </section>
             </div>
-            <div class="output-description">
-                Model extracts: Object | Initial Position | Action Type | Target Position
-            </div>
-            <pre id="output-json" class="output-json">
-{
-  "object": "...",
-  "initial_position": "...",
-  "action": "...",
-  "target_position": "..."
-}
-            </pre>
-        </section>
+        </div>
 
         <!-- Status Bar -->
         <footer class="status-bar">
             <div class="status-item">
-                <span class="status-dot" id="api-status"></span>
-                <span id="api-status-text">Checking API...</span>
+                <span class="status-dot" id="status-dot"></span>
+                <span id="api-status">Checking...</span>
             </div>
             <div class="status-item">
-                <span>Latency: </span>
-                <span id="latency">--</span>
+                <span>Model: action-model (Ollama Local)</span>
             </div>
         </footer>
     </div>
 
-    <!-- Scripts -->
     <script src="scene.js"></script>
     <script src="app.js"></script>
 </body>

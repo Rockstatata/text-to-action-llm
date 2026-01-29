@@ -1,21 +1,39 @@
-# 🎯 Text-to-Action LLM
+#  Text-to-Action LLM
 
-A research-grade system that converts natural language instructions into structured JSON action plans for 3D scene manipulation.
+A research-grade system that converts natural language instructions into structured JSON action plans for scene manipulation, with support for **chained commands** and **continuous motion animation**.
 
-## 🧠 Project Overview
+##  Project Overview
 
-This project demonstrates end-to-end LLM fine-tuning and deployment for instruction-to-action parsing. Given a natural language command like *"Move the red box to the blue platform"*, the system outputs a structured JSON response:
+This project demonstrates end-to-end LLM fine-tuning and deployment for instruction-to-action parsing. Given a natural language command, the system outputs a structured JSON response:
 
+**Single Action:**
 ```json
 {
   "object": "red box",
-  "initial_position": "floor",
   "action": "move",
-  "target_position": "top of blue platform"
+  "target_position": "blue platform"
 }
 ```
 
-## 🏗️ System Architecture
+**Chained Commands:**
+```json
+{
+  "sequence": [
+    {"object": "red box", "action": "move", "target_position": "top shelf"},
+    {"object": "green sphere", "action": "rotate", "target_position": "90 degrees"}
+  ]
+}
+```
+
+##  Features
+
+- ** LLM Reasoning**: Model infers objects, actions, and positions - no hardcoded rules
+- **🔗 Chained Commands**: Support for sequential multi-step actions ("then", "after")
+- ** Smooth Animation**: Continuous motion visualization with easing
+- ** Dynamic Objects**: Create/remove objects at runtime
+- ** Modern UI**: Clean, responsive interface with execution logs
+
+##  System Architecture
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
@@ -28,7 +46,7 @@ This project demonstrates end-to-end LLM fine-tuning and deployment for instruct
 
 See [docs/architecture.md](docs/architecture.md) for detailed system design.
 
-## 📁 Repository Structure
+##  Repository Structure
 
 ```
 text-to-action-llm/
@@ -42,7 +60,7 @@ text-to-action-llm/
 └── deployment/        # Setup guides for Colab, ngrok, Ollama
 ```
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### 1. Backend (FastAPI)
 
@@ -79,19 +97,31 @@ Open `research/colab/finetune_llama31_unsloth.ipynb` in Google Colab with GPU ru
 | "Move the red box to the platform" | `{"object": "red box", "action": "move", ...}` |
 | "Rotate the blue sphere 90 degrees" | `{"object": "blue sphere", "action": "rotate", ...}` |
 | "Scale the green cube by 2x" | `{"object": "green cube", "action": "scale", ...}` |
+| "Move red box to shelf, then rotate blue sphere" | `{"sequence": [{...}, {...}]}` |
+
+## ✅ Assignment Requirements
+
+| Requirement | Implementation |
+|-------------|----------------|
+| LLM runs locally | ✅ Ollama + fine-tuned LLaMA |
+| Model reasoning (no hardcoding) | ✅ LLM infers all actions |
+| Structured JSON output | ✅ Pydantic-validated |
+| Motion visualization | ✅ Canvas animation |
+| **Optional: Multiple objects** | ✅ Sequence-based |
+| **Optional: Chained commands** | ✅ Async/await execution |
+| **Optional: Continuous animation** | ✅ requestAnimationFrame |
 
 ## 🛠️ Future Extensions
 
-- [ ] Multi-object action chaining
 - [ ] Animation keyframe generation
 - [ ] Real-time voice input
 - [ ] Multi-modal scene understanding
 
-## 📝 License
+##  License
 
 MIT License - see [LICENSE](LICENSE) for details.
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions welcome! Please read the architecture docs before submitting PRs.
 
