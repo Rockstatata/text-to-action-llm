@@ -251,20 +251,25 @@ const App = (() => {
     
     const displayOutput = (data) => {
         try {
-            // Enrich data with initial positions
-            const enriched = enrichWithInitialPositions(data);
+            // Show actual current positions (not model's predictions)
+            const enriched = enrichWithActualPositions(data);
             elements.outputJson.textContent = JSON.stringify(enriched, null, 2);
         } catch {
             elements.outputJson.textContent = String(data);
         }
     };
     
-    const enrichWithInitialPositions = (data) => {
-        const addInitialPos = (action) => {
-            if (!action.initial_position && action.object) {
+    const enrichWithActualPositions = (data) => {
+        const addActualPos = (action) => {
+            // Show the named position from last move, not coordinates
+            if (action.object) {
                 const obj = Scene.getObject(action.object);
                 if (obj) {
-                    action.initial_position = `(${Math.round(obj.x)}, ${Math.round(obj.y)})`;
+                    // Use the remembered named position
+                    action.initial_position = obj.lastPosition || 'origin';
+                } else {
+                    // Object doesn't exist yet - keep model's prediction or use 'origin'
+                    action.initial_position = action.initial_position || 'origin';
                 }
             }
             return action;
@@ -273,12 +278,12 @@ const App = (() => {
         if (data.sequence && Array.isArray(data.sequence)) {
             return {
                 ...data,
-                sequence: data.sequence.map(addInitialPos)
+                sequence: data.sequence.map(addActualPos)
             };
         } else if (data.object && data.action) {
-            return addInitialPos({ ...data });
+            return addActualPos({ ...data });
         } else if (Array.isArray(data)) {
-            return data.map(addInitialPos);
+            return data.map(addActualPos);
         }
         return data;
     };
@@ -305,9 +310,34 @@ const App = (() => {
         
         for (let i = 0; i < actions.length; i++) {
             const action = normalizeAction(actions[i]);
+            
+            // Capture actual named position BEFORE executing
+            const obj = Scene.getObject(action.object);
+            if (obj) {
+                action.initial_position = obj.lastPosition || 'origin';
+            } else {
+                action.initial_position = action.initial_position || 'origin';
+            }
+            
+            // Update display with actual initial position
+            if (data.sequence) {
+                data.sequence[i] = action;
+            } else {
+                Object.assign(data, action);
+            }
+            displayOutput(data);
+            
             log(`[${i + 1}/${actions.length}] ${action.action} ${action.object} → ${action.target_position}`, 'action');
             
             const success = await Scene.executeAction(action);
+            
+            // After successful execution, update object's lastPosition
+            if (success) {
+                const updatedObj = Scene.getObject(action.object);
+                if (updatedObj && action.target_position) {
+                    Scene.updateLastPosition(action.object, action.target_position);
+                }
+            }
             
             if (!success) {
                 log(`Action failed: object "${action.object}" not found`, 'error');

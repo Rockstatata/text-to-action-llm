@@ -1,8 +1,8 @@
-#  Text-to-Action LLM
+# Text-to-Action LLM
 
 A research-grade system that converts natural language instructions into structured JSON action plans for scene manipulation, with support for **chained commands** and **continuous motion animation**.
 
-##  Project Overview
+## Project Overview
 
 This project demonstrates end-to-end LLM fine-tuning and deployment for instruction-to-action parsing. Given a natural language command, the system outputs a structured JSON response:
 
@@ -10,6 +10,7 @@ This project demonstrates end-to-end LLM fine-tuning and deployment for instruct
 ```json
 {
   "object": "red box",
+  "initial_position": "floor",
   "action": "move",
   "target_position": "blue platform"
 }
@@ -19,34 +20,34 @@ This project demonstrates end-to-end LLM fine-tuning and deployment for instruct
 ```json
 {
   "sequence": [
-    {"object": "red box", "action": "move", "target_position": "top shelf"},
-    {"object": "green sphere", "action": "rotate", "target_position": "90 degrees"}
+    {"object": "red box", "initial_position": "floor", "action": "move", "target_position": "top shelf"},
+    {"object": "green sphere", "initial_position": "center", "action": "rotate", "target_position": "90 degrees"}
   ]
 }
 ```
 
-##  Features
+## Features
 
-- ** LLM Reasoning**: Model infers objects, actions, and positions - no hardcoded rules
-- **🔗 Chained Commands**: Support for sequential multi-step actions ("then", "after")
-- ** Smooth Animation**: Continuous motion visualization with easing
-- ** Dynamic Objects**: Create/remove objects at runtime
-- ** Modern UI**: Clean, responsive interface with execution logs
+- **LLM Reasoning**: Model infers objects, actions, and positions - no hardcoded rules
+- **Chained Commands**: Support for sequential multi-step actions ("then", "after")
+- **Smooth Animation**: Continuous motion visualization with easing
+- **Dynamic Objects**: Create/remove objects at runtime
+- **Modern UI**: Clean, responsive interface with execution logs
 
-##  System Architecture
+## System Architecture
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│    Frontend     │────▶│    Backend      │────▶│   Fine-tuned    │
+│    Frontend     │────>│    Backend      │────>│   Fine-tuned    │
 │  (Three.js/JS)  │     │   (FastAPI)     │     │   LLaMA + LoRA  │
-│                 │◀────│                 │◀────│                 │
+│                 │<────│                 │<────│                 │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
      Visualize              /infer API            Structured JSON
 ```
 
 See [docs/architecture.md](docs/architecture.md) for detailed system design.
 
-##  Repository Structure
+## Repository Structure
 
 ```
 text-to-action-llm/
@@ -60,7 +61,15 @@ text-to-action-llm/
 └── deployment/        # Setup guides for Colab, ngrok, Ollama
 ```
 
-##  Quick Start
+## Complete Workflow
+
+The system follows a 5-phase pipeline from data generation to interactive visualization. The diagram below shows the full flow from dataset generation and fine-tuning through deployment and frontend visualization.
+
+![Complete Workflow](docs/Flow%20Diagram.png)
+
+*Figure: End-to-end system workflow from data generation to interactive visualization.*
+
+## Quick Start
 
 ### 1. Backend (FastAPI)
 
@@ -83,14 +92,14 @@ python -m http.server 8080
 
 Open `research/colab/finetune_llama31_unsloth.ipynb` in Google Colab with GPU runtime.
 
-## 🔬 Research Highlights
+## Research Highlights
 
 - **Model**: LLaMA 3.1 8B with QLoRA adapters
 - **Training**: Unsloth for 2x faster fine-tuning
 - **Dataset**: Synthetic instruction-action pairs
 - **Output**: Pydantic-validated structured JSON
 
-## 📊 Example Use Cases
+## Example Use Cases
 
 | Instruction | Output Action |
 |-------------|---------------|
@@ -99,32 +108,32 @@ Open `research/colab/finetune_llama31_unsloth.ipynb` in Google Colab with GPU ru
 | "Scale the green cube by 2x" | `{"object": "green cube", "action": "scale", ...}` |
 | "Move red box to shelf, then rotate blue sphere" | `{"sequence": [{...}, {...}]}` |
 
-## ✅ Assignment Requirements
+## Assignment Requirements
 
 | Requirement | Implementation |
 |-------------|----------------|
-| LLM runs locally | ✅ Ollama + fine-tuned LLaMA |
-| Model reasoning (no hardcoding) | ✅ LLM infers all actions |
-| Structured JSON output | ✅ Pydantic-validated |
-| Motion visualization | ✅ Canvas animation |
-| **Optional: Multiple objects** | ✅ Sequence-based |
-| **Optional: Chained commands** | ✅ Async/await execution |
-| **Optional: Continuous animation** | ✅ requestAnimationFrame |
+| LLM runs locally | Yes - Ollama + fine-tuned LLaMA |
+| Model reasoning (no hardcoding) | Yes - LLM infers all actions |
+| Structured JSON output | Yes - Pydantic-validated |
+| Motion visualization | Yes - Canvas animation |
+| Multiple objects | Yes - Sequence-based |
+| Chained commands | Yes - Async/await execution |
+| Continuous animation | Yes - requestAnimationFrame |
 
-## 🛠️ Future Extensions
+## Future Extensions
 
 - [ ] Animation keyframe generation
 - [ ] Real-time voice input
 - [ ] Multi-modal scene understanding
 
-##  License
+## License
 
 MIT License - see [LICENSE](LICENSE) for details.
 
-##  Contributing
+## Contributing
 
 Contributions welcome! Please read the architecture docs before submitting PRs.
 
 ---
 
-*Built with ❤️ for LLM research and practical deployment*
+Built for LLM research and practical deployment

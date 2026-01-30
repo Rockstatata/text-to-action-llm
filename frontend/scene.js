@@ -269,6 +269,43 @@ const Scene = (() => {
         return { x: canvas.width / 2, y: canvas.height / 2 };
     };
     
+    // Parse color from object name (e.g., "red box" -> red)
+    const parseColor = (objectName) => {
+        const colorMap = {
+            'red': '#ef4444',
+            'blue': '#3b82f6',
+            'green': '#10b981',
+            'yellow': '#eab308',
+            'purple': '#a855f7',
+            'orange': '#f97316',
+            'pink': '#ec4899',
+            'cyan': '#06b6d4',
+            'gray': '#6b7280',
+            'black': '#1f2937',
+            'white': '#f3f4f6'
+        };
+        
+        const nameLower = String(objectName).toLowerCase();
+        for (const [colorName, hex] of Object.entries(colorMap)) {
+            if (nameLower.includes(colorName)) {
+                return hex;
+            }
+        }
+        return null;
+    };
+    
+    // Parse shape from object name (e.g., "red box" -> box, "blue circle" -> circle)
+    const parseShape = (objectName) => {
+        const nameLower = String(objectName).toLowerCase();
+        if (nameLower.includes('circle') || nameLower.includes('ball') || nameLower.includes('sphere')) {
+            return 'circle';
+        }
+        if (nameLower.includes('box') || nameLower.includes('cube') || nameLower.includes('square')) {
+            return 'box';
+        }
+        return 'box'; // default
+    };
+    
     // Add object to scene
     const addObject = (name, config) => {
         const position = resolvePosition(config.position) || { 
@@ -286,7 +323,8 @@ const Scene = (() => {
             height: config.height || 50,
             rotation: 0,
             scale: 1,
-            opacity: 1
+            opacity: 1,
+            lastPosition: config.position || 'origin'  // Track named position
         };
         
         return objects[name];
@@ -321,6 +359,14 @@ const Scene = (() => {
         return key ? objects[key] : null;
     };
     
+    // Update object's last position (named position, not coordinates)
+    const updateLastPosition = (name, position) => {
+        const key = findObjectKey(name);
+        if (key && objects[key]) {
+            objects[key].lastPosition = position;
+        }
+    };
+    
     // Get all objects
     const getObjects = () => ({ ...objects });
     
@@ -333,12 +379,47 @@ const Scene = (() => {
     // Execute action
     const executeAction = (action) => {
         return new Promise((resolve) => {
-            const obj = getObject(action.object);
-            if (!obj) {
-                console.warn(`Object not found: ${action.object}`);
-                resolve(false);
-                return;
+            let obj = getObject(action.object);
+            let actualInitialPosition = null;
+            
+            // If object exists, capture its current position before any changes
+            if (obj) {
+                actualInitialPosition = {
+                    x: obj.x,
+                    y: obj.y,
+                    formatted: `(${Math.round(obj.x)}, ${Math.round(obj.y)})`
+                };
             }
+            
+            // If object doesn't exist, create it using model's initial_position
+            if (!obj) {
+                console.log(`Creating new object: ${action.object}`);
+                const initialPos = action.initial_position ? 
+                    resolvePosition(action.initial_position) : 
+                    { x: canvas.width / 2, y: canvas.height / 2 };
+                
+                // Parse color and shape from object name
+                const color = parseColor(action.object) || '#3b82f6';
+                const shape = parseShape(action.object) || 'box';
+                
+                obj = addObject(action.object, {
+                    position: action.initial_position || 'center',
+                    color: color,
+                    type: shape,
+                    x: initialPos.x,
+                    y: initialPos.y
+                });
+                
+                // Update actualInitialPosition for newly created object
+                actualInitialPosition = {
+                    x: obj.x,
+                    y: obj.y,
+                    formatted: `(${Math.round(obj.x)}, ${Math.round(obj.y)})`
+                };
+            }
+            
+            // Store the actual initial position in the action for reference
+            action.actualInitialPosition = actualInitialPosition;
             
             const actionType = String(action.action || '').toLowerCase();
             const duration = 800;
@@ -621,6 +702,7 @@ const Scene = (() => {
         executeAction,
         resolvePosition,
         getPositionNames,
+        updateLastPosition,  // Add new method
         isAnimating: () => animations.length > 0,
         addPlatform: (config) => {
             const platform = {
